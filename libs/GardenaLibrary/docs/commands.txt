@@ -1,0 +1,64 @@
+Draft:
+
+Turning valves on/off by SMS (all commands without quotation marks""):
+-simple on/off:
+"valve X on"	-turns valve X on, where X is 1,2 or 3 (respectively "off" turns valve X off)
+"valves on"		-turns all valves on at the same time
+"valve X"		-gives status (on/off)
+"valves"		-gives status (on/off
+
+-switch to automatic: (by default based on rain sensor)
+"valve X  auto"	-turns valve x off when rain detected (by default those commands turn off the valves in question when rain starts)
+"valves  auto"	-turns valves off when rain detected (by default those commands turn off the valves in question when rain starts)
+"valve X  man"	-disables previous auto funciotnality for valve x
+"valves  man"	-disables previous auto funciotnality for all valves
+also:
+"valve X  moist"	-turns valve x off when moist detected 
+"valves  moist"	-turns valves off when moist detected
+
+
+Getting measurements via SMS:
+-simply retrieving value: 
+"temp"	-replies SMS temperature
+"moist"	-replies measured moisture (A/D converted value only, close to 0 very dry, between 450-600 when sensor put into water) 
+"rain"	-raining or no rain
+"clock"	-system(rtc) time (time hh:mm	sets time)
+
+-automatic reporting:
+"gsm timer|temp|moist|rain rising|falling|start|stop|periodic|reset" -based in conditions; e.g. "rain rain start" reports rain whenever rain detected, or "moist moist rising 200" reports moisture value whenever value raises above 200
+
+
+
+
+changing thresholds for conditional valve switching or auto reporting:
+temp|moist|rain Y 	-temperature, moisture or rain set threshold Y; e.g. "moist 100" sets threshold to 100->when "valve on moist falling" is activated, the valves are turned on when moist gets below 100
+//timer mmm		-time in minutes; e.g. "time 60" and then "valves on timer" will turn all valves on for one hour and then turn them off
+//timer hh:mm 	-start- stop- time (timer mmm should be set to 0, otherwise valves will turn on/off first, for give mmm duration); 
+
+e.g:
+temp
+temp thr xxx rising|falling|both					-if only one of the thresholds given, both thresholds set equal
+temp reset 											-to default conditions
+temp temp|etc
+
+moist
+moist thrh xxx thrl yyy rising|falling|both			-if only one of the thresholds given, both thresholds set equal
+moist reset 										-to default conditions
+moist moist|etc.
+
+
+clock
+clock time hh:min
+clock date dd:mm:yyyy
+
+timer X
+timer X mmm
+timer X start hh:mm stop hh:m interval once|daily
+timer X reset 										-to default conditions
+
+marker:
+(in general: "valve X  moist|rain(=auto/man)|temp|timer	)
+(or: "valves moist|rain|temp|timer")	-conditional (rising, falling thresholds are set for moisture, rain, temperature separatly, see bewlo; reset stops condition)
+
+in general: "valve X  moist|rain(=auto/man)|temp|timer rising|falling|reset]"	-conditional (rising, falling thresholds are set for moisture, rain, temperature separatly, see bewlo; reset stops condition)
+(or valves moist|rain|temp|timer rising|falling|start|stop|duration|reset]"	-conditional (rising, falling thresholds are set for moisture, rain, temperature separatly, see bewlo; reset stops condition)

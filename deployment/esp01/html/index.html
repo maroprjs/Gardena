@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<!--meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="settings" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding"-->
+<title>Gardena Steuerung</title>
+<script src="config.js" ></script>
+<script type="text/javascript" >
+var numOfValves=0;
+var valvesGroup = "";
+var offTxt = "\u268B aus"
+var onTxt = "\u26F2 an"
+function mr_loadConfig ()
+{
+	valvesGroup = config;
+	getNumberOfValves();//to global variable
+	var elmt;
+	var txt;
+	var att;
+	
+	for(var i = 1; i <= numOfValves; i++)
+	{
+		elmt = document.createElement("text");
+		//txt = document.createTextNode("valve: " + i.toString());
+		txt = document.createTextNode(valvesGroup["valve" + i.toString()].name);
+		elmt.appendChild(txt);
+		document.body.appendChild(elmt);
+		att = document.createAttribute("id");       // id
+		att.value = "text" + i.toString(); 
+		elmt.setAttributeNode(att);
+		elmt = document.createElement("br"); 
+		document.body.appendChild(elmt);
+		
+		//----------UP---------------------------
+		elmt = document.createElement("button");        // button    
+		txt = document.createTextNode("\u26F2 an"); //fountain      
+		//txt = document.createTextNode("\u268B aus"); //yin   
+		//txt = document.createTextNode("\u264B an"); //cancer 		     
+		elmt.appendChild(txt);                                
+
+		att = document.createAttribute("class");       // style
+		att.value = "btn";    
+		elmt.setAttributeNode(att);
+		
+		att = document.createAttribute("id");       // id
+		att.value = "button" + i.toString();    
+		elmt.setAttributeNode(att);
+
+		att = document.createAttribute("onclick");       // onclick
+		att.value = "my_click(" + i.toString() + ")";    
+		elmt.setAttributeNode(att);
+		
+	//	elmt = document.createElement("input");        // radio
+		
+
+		document.body.appendChild(elmt); 
+		//----------UP---------------------------
+	
+		elmt = document.createElement("br"); 
+		document.body.appendChild(elmt);
+	
+	
+		elmt = document.createElement("br"); 
+		document.body.appendChild(elmt);
+		
+		elmt = document.createElement("br"); 
+		document.body.appendChild(elmt);
+		
+	}
+		//----------FLOW---------------------------
+		elmt = document.createElement("button");        // button     
+		txt = document.createTextNode("\u264B flow"); //cancer          
+		elmt.appendChild(txt);                                
+
+		att = document.createAttribute("class");       // style
+		att.value = "btn_2";    
+		elmt.setAttributeNode(att);
+		
+		att = document.createAttribute("id");       // id
+		att.value = "flow";    
+		elmt.setAttributeNode(att);
+
+		att = document.createAttribute("onclick");       // onclick
+		att.value = "my_clickFlow()";    
+		elmt.setAttributeNode(att);
+		
+	//	elmt = document.createElement("input");        // radio
+		
+
+		document.body.appendChild(elmt); 
+		//----------FLOW---------------------------
+
+	initializeAJAX();
+	getValvesStatus();
+}
+
+function initializeAJAX()
+{
+	// Request erzeugen
+	if (window.XMLHttpRequest) {
+		myAjax = new XMLHttpRequest(); // Mozilla, Safari, Opera
+	} else if (window.ActiveXObject) {
+		try {
+			myAjax = new ActiveXObject('Msxml2.XMLHTTP'); // IE 5
+		} catch (e) {
+			try {
+				myAjax = new ActiveXObject('Microsoft.XMLHTTP'); // IE 6
+			} catch (e) {}
+		}
+	}
+}
+
+
+function getNumberOfValves()
+{
+	
+	var maxFound = false;
+	var count = 0;
+	while (maxFound == false)
+	{
+		count++;
+		if  (("valve" + count.toString() in valvesGroup)==true){
+			numOfValves++;
+		}
+		else
+		{
+			maxFound = true;
+		}
+	}
+
+}
+
+function my_click(valve)
+{
+	//console.log("valve: " + valve);
+	var cmd;
+	document.getElementById('mr_sensor').textContent = "Ventile Ein-/Ausschalten";
+	if (!myAjax) 
+	{
+		alert("Konnte keine XMLHTTP-Instanz erzeugen");
+		return false;
+	} 
+	else 
+	{
+	    if (document.getElementById('button' + valve.toString()).innerHTML == offTxt){ 
+			cmd = "on"
+		}else{
+			cmd = "off"
+		};
+		myAjax.onreadystatechange=responseCheck;
+		var Url = "myfunction?"+"scope=valve" + "&cmd=" + "valve" + valve + " " + cmd  + "&timestamp=" + new Date().getTime();
+		myAjax.open("GET",Url,true);
+		myAjax.send();
+		document.getElementById('status').setAttribute("class","status_btn2");
+	}
+
+}
+
+function my_clickFlow()
+{
+	var cmd;
+	if (!myAjax) 
+	{
+		alert("Konnte keine XMLHTTP-Instanz erzeugen");
+		return false;
+	} 
+	else 
+	{
+		myAjax.onreadystatechange=responseCheck;
+		var Url = "myfunction?"+"scope=flow" + "&cmd=" + "flow" + "&timestamp=" + new Date().getTime();
+		myAjax.open("GET",Url,true);
+		myAjax.send();
+		document.getElementById('status').setAttribute("class","status_btn2");
+	}
+
+}
+
+function getValvesStatus()
+{
+	if (!myAjax) 
+	{
+		alert("Konnte keine XMLHTTP-Instanz erzeugen");
+		return false;
+	} 
+	else 
+	{
+		myAjax.onreadystatechange=responseCheck;
+		var Url = "myfunction?"+"scope=valves" + "&cmd=valves" + "&timestamp=" + new Date().getTime();
+		myAjax.open("GET",Url,true);
+		myAjax.send();
+	}
+}
+
+
+
+function responseCheck() 
+{
+	 if (myAjax.readyState==4 && myAjax.status==200)
+	{
+	    //console.log(myAjax.responseText);
+		var response = JSON.parse(myAjax.responseText);
+		console.log(response);
+		if (response.status == "OK"){
+			document.getElementById('status').setAttribute("class","status_btn1");
+		}
+		if (response.scope == "valves"){
+			//document.getElementById('status').setAttribute("class","status_btn1");
+			var valveIdStrg = "valve";
+			for(var i = 1; i <= numOfValves; i++){
+				valveIdStrg = valveIdStrg + i.toString();
+				document.getElementById('text' + i.toString()).innerHTML = valveIdStrg + ": " + response["data"][valveIdStrg].info;
+				if (response["data"][valveIdStrg].status == "off"){
+					document.getElementById('button' + i.toString()).setAttribute("class","btn_grey");
+					document.getElementById('button' + i.toString()).innerHTML = offTxt;
+				}
+				else{
+					document.getElementById('button' + i.toString()).setAttribute("class","btn");
+					document.getElementById('button' + i.toString()).innerHTML = onTxt;
+				}
+
+				valveIdStrg = "valve";
+			}
+		}else if (response.scope == "valve"){
+			var valveIdStrg = "valve";
+			for(var i = 1; i <= numOfValves; i++){
+				valveIdStrg = valveIdStrg + i.toString();
+				if (response["data"][valveIdStrg]){
+					if (response["data"][valveIdStrg].status == "off"){
+						document.getElementById('button' + i.toString()).setAttribute("class","btn_grey");
+						document.getElementById('button' + i.toString()).innerHTML = offTxt;
+					}else{
+						document.getElementById('button' + i.toString()).setAttribute("class","btn");
+						document.getElementById('button' + i.toString()).innerHTML = onTxt;
+						
+					}
+					document.getElementById('text' + i.toString()).innerHTML = valveIdStrg + ": " + response["data"][valveIdStrg].info;
+				}
+				valveIdStrg = "valve";
+			}
+			
+		}else if (response.scope == "flow"){
+			document.getElementById('mr_sensor').textContent = response["data"].flow;
+		}else if (response.status == "OK_sensor"){
+			document.getElementById('mr_sensor').textContent = response.content;
+			
+			
+		}; 
+	}
+}
+
+</script>
+<style>
+.button_style {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+    text-decoration: none;
+    color: initial;
+    padding: 3px 5px;
+    border: 1px solid #000;
+    background: #eee;
+}
+
+.btn {
+
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-border-radius: 25;
+  -moz-border-radius: 25;
+  border-radius: 25px;
+  font-family: Arial;
+  color: #ffffff;
+  width  :  50px;
+  height :50px;
+
+  vertical-align: center; 
+  text-align: center;
+  width  :  50px;
+  height :50px;
+  font-size: 16px;
+
+  
+}
+
+.btn_grey {
+
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #e8ecef, #bcc0c4);
+  background-image: -moz-linear-gradient(top, #e8ecef, #bcc0c4);
+  background-image: -ms-linear-gradient(top, #e8ecef, #bcc0c4);
+  background-image: -o-linear-gradient(top, #e8ecef, #bcc0c4);
+  background-image: linear-gradient(to bottom, #e8ecef, #bcc0c4);
+  -webkit-border-radius: 25;
+  -moz-border-radius: 25;
+  border-radius: 25px;
+  font-family: Arial;
+  color: #ffffff;
+  width  :  50px;
+  height :50px;
+
+  vertical-align: center; 
+  text-align: center;
+  width  :  50px;
+  height :50px;
+  font-size: 16px;
+
+  
+}
+.btn_2 {
+
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  font-family: Arial;
+  color: #ffffff;
+  width  :  50px;
+  height :35px;
+
+  vertical-align: center; 
+  text-align: center;
+  width  :  50px;
+  height :35px;
+  font-size: 12px;
+
+  
+}
+
+.btn1 {
+
+  
+ 
+  font-family: Arial;
+  color: #ffffff;
+
+
+  vertical-align: center; 
+  text-align: center;
+  width  :  50px;
+  height :50px;
+  font-size: 16px;
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -moz-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -ms-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -o-linear-gradient(top, #ed13e9, #de1843);
+  background-image: linear-gradient(to bottom, #ed13e9, #de1843);
+  text-decoration: none;
+  
+}
+.btn1_2 {
+
+  
+  -webkit-border-radius: 25;
+  -moz-border-radius: 25;
+  border-radius: 25px;
+  font-family: Arial;
+  color: #ffffff;
+
+
+  vertical-align: center; 
+  text-align: center;
+  width  :  50px;
+  height :50px;
+  font-size: 16px;
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -moz-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -ms-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -o-linear-gradient(top, #ed13e9, #de1843);
+  background-image: linear-gradient(to bottom, #ed13e9, #de1843);
+  text-decoration: none;
+  
+}
+
+.status_btn1 {
+
+  background: #81db34;
+  background-image: -webkit-linear-gradient(top, #81db34, #28b951);
+  background-image: -moz-linear-gradient(top, #81db34, #28b951);
+  background-image: -ms-linear-gradient(top, #81db34, #28b951);
+  background-image: -o-linear-gradient(top, #81db34, #28b951);
+  background-image: linear-gradient(to bottom, #81db34, #28b951);
+  -webkit-border-radius: 20;
+  -moz-border-radius: 20;
+  border-radius: 2px;
+  font-family: Arial;
+  color: #ffffff;
+  width  :  10px;
+  height :10px;
+
+  vertical-align: center; 
+  text-align: center;
+
+  font-size: 16px;
+
+  
+}
+
+.status_btn2 {
+
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -moz-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -ms-linear-gradient(top, #ed13e9, #de1843);
+  background-image: -o-linear-gradient(top, #ed13e9, #de1843);
+  background-image: linear-gradient(to bottom, #ed13e9, #de1843);
+  -webkit-border-radius: 20;
+  -moz-border-radius: 20;
+  border-radius: 2px;
+  font-family: Arial;
+  color: #ffffff;
+  width  :  10px;
+  height :10px;
+
+  vertical-align: center; 
+  text-align: center;
+
+  font-size: 16px;
+
+  
+}
+
+</style>
+</head><body onload="javascript:mr_loadConfig();">
+<text id="mr_sensor">Ventile Ein-/Ausschalten</text>
+<a href="./index.html"><hr></a>
+<div id="status" class="status_btn1"></div>
+</body></html>
+
+
