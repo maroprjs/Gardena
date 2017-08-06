@@ -9,6 +9,7 @@
 #define SMS_H_
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 //namespace Gardena {
 
@@ -20,6 +21,8 @@ public:
 	String sender;
 	String receiver;
 	String msg;
+	JsonObject* jsonMsg;
+	JsonArray* jsonData;
 	bool newMsgArrived;
 private:
 	char smsMessage[255];

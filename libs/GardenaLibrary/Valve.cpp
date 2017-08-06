@@ -464,22 +464,30 @@ void Valve::walkTheCommandLine(Command * objPtr,paramTree_t parTree){
 }
 
 
-
+//function statusTxt(..) composes:
+//-return message for real SMS towards GSM modem in smsReply
+//-return message in "self-made" json format
+//-json message using ArduinoJson library
+//TODO: clean/unify this!!!
 //this is what I want: "valve1":{"status":"on","info":"rain and moist"}
 String Valve::statusTxt(SMS* smsReply,Command * objPtr){
 	PRINT("Valve::statusTxt called");
 	Valve *v = (Valve*)objPtr;
+	JsonObject& jValve = smsReply->jsonMsg->createNestedObject(v->_valve_name);
+
 	bool manual = true;
 	String retVal = "\"" + v->_valve_name + "\"" + ":{" + "\"" + "status" + "\"" + ":" + "\"";
 	smsReply->msg = smsReply->msg + " " +  v->_valve_name + ": ";
 	if (v->_valve_state == ON){
 		retVal = retVal + "on" ;
 		smsReply->msg = smsReply->msg + "on ";
+		jValve["status"] = "on";
 
 	}
 	else {
 		retVal = retVal + "off" ;
 		smsReply->msg = smsReply->msg + "off ";
+		jValve["status"] = "off";
 
 	}
 	retVal = retVal + "\"" + "," + "\"" + "info" + "\"" + ":" + "\"";
@@ -488,6 +496,7 @@ String Valve::statusTxt(SMS* smsReply,Command * objPtr){
 	//iterate through all dependencies and act accordingly
 	Measurement::measurementDependencyVector_t::iterator measDepsIterator;
 	Measurement::measurementDependency_t md;
+	String jInfoStrg = "";
 	for (measDepsIterator = v->_measurementDependencyVector.begin();
 			measDepsIterator != v->_measurementDependencyVector.end(); ++measDepsIterator)
 	{
@@ -496,12 +505,15 @@ String Valve::statusTxt(SMS* smsReply,Command * objPtr){
 			manual = false;
 			retVal = retVal + md.measurement->name + " automatic ";
 			smsReply->msg =  smsReply->msg + md.measurement->name + " automatic ";
+			jInfoStrg = md.measurement->name + " automatic ";
 			if (md.measurement->sensorDetected() == false) {
 				retVal = retVal + " but no sensor!";
 				smsReply->msg =  smsReply->msg + " but no sensor!";
+				jInfoStrg = jInfoStrg + " but no sensor";
 			}else{
 				retVal = retVal + " val: " + md.measurement->getCurrentMeasVal();
 				smsReply->msg =  smsReply->msg + " val: " + md.measurement->getCurrentMeasVal();
+				jInfoStrg = jInfoStrg + " val: " + md.measurement->getCurrentMeasVal();
 			}
 		}
 
@@ -509,8 +521,11 @@ String Valve::statusTxt(SMS* smsReply,Command * objPtr){
 	if (manual){
 		retVal = retVal + "manual";
 		smsReply->msg =  smsReply->msg + "man";
+		jInfoStrg = "manual";
 	}
 	retVal = retVal + "\"" + "}";
+	jValve["info"] = jInfoStrg;
+	smsReply->jsonData->add(jValve);
 	PRINTLN(" with json return:  " + retVal);
 	PRINTLN(" with sms return:  " + smsReply->msg);
 	return retVal;

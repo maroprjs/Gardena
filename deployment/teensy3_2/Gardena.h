@@ -11,7 +11,7 @@
 //namespace GARDENA_TEENSY {
 
 //#include <Arduino.h>
-#include <Relay.h>
+#include "Relay.h"
 #include "HBridge.h"
 #include "Valve.h"
 #include "GsmModem.h"

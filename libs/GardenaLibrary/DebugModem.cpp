@@ -19,7 +19,8 @@ DebugModem::~DebugModem() {
 }
 
 void DebugModem::begin(){
-	PRINT_INIT(_baudrate);
+	//PRINT_INIT(_baudrate);
+	Serial.begin(_baudrate);
 	//PRINTLN("DebugModem::begin() called");
 }
 
@@ -29,7 +30,7 @@ void DebugModem::handle(){
 		String dataFromConsole = "";
 		dataFromConsole = Serial.readStringUntil('\n');
 		//Serial.println("data: "+inData);
-		PRINTLN(dataFromConsole);
+		Serial.println(dataFromConsole);
 		//TODO: check if semaphore needed:
 		dbgService->msg = dataFromConsole;
 		dbgService->newMsgArrived = true;//subscriber.handle thread will check if new message has arrived

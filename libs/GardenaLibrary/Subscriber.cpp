@@ -137,23 +137,21 @@ void Subscriber::processSMS(String info){
 void Subscriber::processWebRequest(String info){
 	DynamicJsonBuffer jsonRecBuffer;
 	DynamicJsonBuffer jsonSendBuffer;
-	//str = _wifi->webService->msg;
 	String tmpStrg = "";
+	String webRequestStatus = "OK";
 	JsonObject& jsonRequest = jsonRecBuffer.parseObject(_wifi->webService->msg);
-	// JsonObject& jsonReply = jsonSendBuffer.createObject();
-	 String webRequestStatus = "OK";
+	_wifi->webService->jsonMsg = &jsonSendBuffer.createObject();
+	_wifi->webService->jsonData = &_wifi->webService->jsonMsg->createNestedArray("data");
 	_wifi->webService->newMsgArrived = false;//message read
 	 if (jsonRequest.success()){
 		 //String str = "";
 		 if (jsonRequest.containsKey("cmd")){
 		     String cmd = jsonRequest["cmd"];
 		     PRINT(" command found: ");PRINTLN(cmd);
-		     //_wifi->webService->msg = _cmdList->iterate(_wifi->webService,cmd);
 		     _wifi->webService->msg = "";
 		     tmpStrg = _cmdList->iterate(_wifi->webService,cmd);
-		     if (_wifi->webService->msg == "") _wifi->webService->msg = "cmd not recognized!";
+		     if (_wifi->webService->msg == "") _wifi->webService->msg = "cmd not recognized!";//TODO: offer help menu
 		     PRINT("sms reply: ");PRINTLN(_wifi->webService->msg);
-		 	//if (_wifi->webService->msg == "") _wifi->webService->msg = "cmd not recognized!";//TODO: offer help menu
 
 		 }
 	 }
@@ -176,7 +174,7 @@ void Subscriber::processWebRequest(String info){
 	 //jsonReply["valve1"] = "on";
 	 //jsonReply["valve2"] = "off";
 	 //jsonReply["valve3"] = "on";
-	 //_wifi->sendWebJsonMsg(jsonReply);
+	 _wifi->sendWebJsonMsg(_wifi->webService->jsonMsg);
 	 _wifi->sendWebStrgMsg(tmpStrg);
 
 }

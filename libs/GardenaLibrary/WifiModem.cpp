@@ -41,10 +41,11 @@ void WifiModem::handle(){
 	}
 }
 
-void WifiModem::sendWebJsonMsg(JsonObject& jsonMsg){
-	String strg = jsonMsg["scope"];
-	PRINT("scope is: ");PRINTLN(strg);
-	jsonMsg.printTo((Print&)*_mySerial);
+void WifiModem::sendWebJsonMsg(JsonObject* jsonMsg){
+
+//	String strg = jsonMsg["scope"];
+//	PRINT("scope is: ");PRINTLN(strg);
+	jsonMsg->printTo((Print&)*_mySerial);
 	_mySerial->println();
 	//for (JsonObject::iterator it = jsonMsg.begin(); it != jsonMsg.end(); ++it) {
 	    // get the object in the array

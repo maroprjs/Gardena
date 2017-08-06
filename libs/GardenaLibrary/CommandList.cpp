@@ -21,13 +21,12 @@ void CommandList::registerCmd(Command * cmd){
 	_cmdList.push_back(cmd);
 }
 
+//return value used for SMS towards GSM, SMS* pointer for web response
 String CommandList::iterate(SMS* reply, String cmd){
 	//PRINTLN("CommandList::iterate(String) called");
 	String retVal = "";
 	String str = "";
 	Command* c;
-	//int bracketCount = 0;
-	//for each registered object's command execute
     for (std::vector<Command*>::const_iterator it = _cmdList.begin();
          it != _cmdList.end(); ++it)
     {
@@ -44,11 +43,6 @@ String CommandList::iterate(SMS* reply, String cmd){
     	}
     	PRINT(" commandlist iterate: ");PRINTLN(retVal);
     }
-    //while (bracketCount > 0){
-    //	retVal = retVal + "}";
-    //	bracketCount--;
-    //}
-
     PRINT("return from commandlist iterate: ");PRINTLN(retVal);
 	return retVal;
 }

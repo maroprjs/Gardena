@@ -16,7 +16,7 @@ public:
 	virtual ~WifiModem();
 	void begin();
 	void handle(void);
-	void sendWebJsonMsg(JsonObject& jsonMsg);
+	void sendWebJsonMsg(JsonObject* jsonMsg);
 	void sendWebStrgMsg(String msg);
 	SMS * webService;
 protected:
