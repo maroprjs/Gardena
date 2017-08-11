@@ -8,5 +8,5 @@ Gardena Watering System control via SMS and/or web interface
 <br>Prototype based on mechanical relays:<br>
 <img src="libs/GardenaLibrary/docs/chassis1_20.png" alt="proto pic" ><br>
 <map name="scopemap">
-  <area shape="rect" coords="399,108,427,153" href="https://github.com/maroprjs/Gardena/blob/master/libs/GardenaLibrary/docs/esp01.pdf" alt="wifi link">
+  <area shape="rect" coords="0,0,180,180" href="https://github.com/maroprjs/Gardena/blob/master/libs/GardenaLibrary/docs/esp01.pdf" alt="wifi link">
 </map> 
